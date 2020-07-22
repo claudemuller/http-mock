@@ -1,4 +1,4 @@
-# http-mock
+# http-mock [![CodeFactor](https://www.codefactor.io/repository/github/claudemuller/http-mock/badge)](https://www.codefactor.io/repository/github/claudemuller/http-mock)
 A mock http server that returns dummy responses.
 
 ## Adding Routes
