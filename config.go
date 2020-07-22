@@ -1,6 +1,10 @@
 package main
 
-import "net/http"
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
 
 // GetRoutes returns all the routes and their configs.
 func GetRoutes() []ParentRoute {
@@ -14,10 +18,10 @@ func GetRoutes() []ParentRoute {
 					method:         http.MethodPost,
 					contentType:    contentTypeJSON,
 					responseStatus: http.StatusOK,
-					response: jsonResp{
+					response: marshallJSON(JSONResp{
 						StatusCode: http.StatusOK,
 						Message:    "Success",
-					},
+					}),
 				},
 				{
 					path:           "/edit/{id}",
@@ -25,12 +29,21 @@ func GetRoutes() []ParentRoute {
 					method:         http.MethodGet,
 					contentType:    contentTypeJSON,
 					responseStatus: http.StatusOK,
-					response: jsonResp{
+					response: marshallJSON(JSONResp{
 						StatusCode: http.StatusOK,
 						Message:    "User is authorized",
-					},
+					}),
 				},
 			},
 		},
 	}
+}
+
+func marshallJSON(j JSONResp) []byte {
+	payload, err := json.Marshal(j)
+	if err != nil {
+		_ = fmt.Errorf("failed creating route %v\n", j)
+	}
+
+	return payload
 }

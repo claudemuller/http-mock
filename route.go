@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -19,10 +18,10 @@ type Route struct {
 	method         string
 	contentType    string
 	responseStatus int
-	response       jsonResp
+	response       []byte
 }
 
-type jsonResp struct {
+type JSONResp struct {
 	StatusCode int    `json:"status_code,omitempty"`
 	Message    string `json:"message,omitempty"`
 }
@@ -31,37 +30,32 @@ type jsonResp struct {
 func (route *Route) Handler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	param := params[route.param]
-	payload := []byte("")
 
 	var err error
 
 	fmt.Printf("Received a %s from %s to %s\n", r.Method, r.RemoteAddr, r.RequestURI)
 	fmt.Printf("Param %s:, %s\n", route.param, param)
 
-	var contentType string
-
-	if route.contentType == contentTypeJSON {
-		payload, err = json.Marshal(route.response)
-		if err != nil {
-			errMsg := "There was a problem crafting the json"
-			fmt.Println(errMsg)
-			http.Error(w, errMsg, http.StatusInternalServerError)
-
-			return
-		}
-
-		contentType = route.contentType
-	} else {
-		contentType = contentTypePlainText
-	}
-
-	w.Header().Set("Content-Type", contentType)
+	setContentType(w, route.contentType)
 	w.WriteHeader(route.responseStatus)
 
-	written, err := w.Write(payload)
+	written, err := w.Write(route.response)
 	if err != nil {
 		fmt.Printf("Error writing response: %s\n", err)
 	}
 
 	fmt.Printf("%d bytes written\n\n", written)
+}
+
+func setContentType(w http.ResponseWriter, ct string) {
+	var contentType string
+
+	switch ct {
+	case contentTypeJSON:
+		contentType = ct
+	default:
+		contentType = contentTypePlainText
+	}
+
+	w.Header().Set("Content-Type", contentType)
 }
